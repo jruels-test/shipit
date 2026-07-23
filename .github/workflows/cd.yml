@@ -84,3 +84,25 @@ jobs:
           az containerapp update -n shipit-production -g "$RG" \
             --image "${{ steps.current.outputs.prev }}"
           exit 1
+
+  infra:
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      appiConn: ${{ steps.deploy.outputs.appiConn }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - id: deploy
+        run: |
+          CONN=$(az deployment group create -g "$RG" \
+            --template-file infra/main.bicep \
+            --parameters env=prod \
+            --query "properties.outputs.connectionString.value" -o tsv)
+          echo "appiConn=$CONN" >> "$GITHUB_OUTPUT"
+        env:
+          RG: ${{ vars.RG }}

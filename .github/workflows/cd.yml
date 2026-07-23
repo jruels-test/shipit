@@ -39,6 +39,7 @@ jobs:
       RG: ${{ vars.RG }}
       ACR: ${{ vars.ACR }}
     steps:
+      - uses: actions/checkout@v5
       - uses: azure/login@v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}

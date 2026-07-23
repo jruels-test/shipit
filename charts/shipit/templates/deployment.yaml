@@ -20,6 +20,7 @@ spec:
           ports: [ { containerPort: 8080 } ]
           envFrom:
             - configMapRef: { name: shipit-config }
+            - secretRef:    { name: shipit-appi }
           readinessProbe:
             httpGet: { path: /readyz, port: 8080 }
             initialDelaySeconds: 3

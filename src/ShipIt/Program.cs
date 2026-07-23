@@ -3,6 +3,11 @@ using ShipIt.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+
 // Default to port 8080 (matches the container image and the Kubernetes probes
 // used in Modules 3 and 6) unless the host sets ASPNETCORE_URLS.
 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))

@@ -18,7 +18,7 @@ var app = builder.Build();
 // ConfigMap (Module 6); locally they fall back to sensible defaults.
 static string Region() => Environment.GetEnvironmentVariable("SHIPIT_REGION") ?? "local";
 static string BannerColor() => Environment.GetEnvironmentVariable("SHIPIT_BANNER_COLOR") ?? "green";
-static string AppVersion() => Environment.GetEnvironmentVariable("SHIPIT_VERSION") ?? "0.1.0-dev";
+static string AppVersion() => Environment.GetEnvironmentVariable("SHIPIT_VERSION") ?? "0.1.1-dev";
 // Readiness can be forced off with SHIPIT_READY=false to simulate a bad deploy
 // (used to trigger rollback in Labs 5 and 7).
 static bool IsReady() =>

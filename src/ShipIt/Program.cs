@@ -34,7 +34,9 @@ app.MapGet("/healthz", () => Results.Text("OK", "text/plain"));
 
 // Readiness: is the app ready to serve real traffic? Kubernetes holds traffic
 // back (and the CD pipeline rolls back) when this returns 503.
-app.MapGet("/readyz", () => Results.Text("NOT READY", "text/plain", statusCode: 503)); // QA: bad deploy test for Lab 6 helm rollback
+app.MapGet("/readyz", () => IsReady()
+    ? Results.Text("READY", "text/plain")
+    : Results.Text("NOT READY", "text/plain", statusCode: 503));
 
 // Human-friendly status page: shows version, region, and the banner color so a
 // config change (per environment) is visible without a rebuild.

@@ -91,3 +91,4 @@ app.Run();
 // Exposed so the test project can host the app with WebApplicationFactory<Program>.
 public partial class Program { }
 // QA: trigger a fresh CI run to rule out re-run cache poisoning
+// QA: verify auto-merge now works

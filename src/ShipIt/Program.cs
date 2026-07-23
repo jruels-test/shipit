@@ -1,6 +1,5 @@
 using ShipIt.Models;
 using ShipIt.Services;
-using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,13 +66,6 @@ app.MapGet("/", () =>
     return Results.Content(html, "text/html");
 });
 
-// vulnerable endpoint to demonstrate a command injection vulnerability. 
-app.MapGet("/trace/{host}", (string host) =>
-{
-    // BAD: user input concatenated into a shell command.
-    Process.Start("/bin/sh", $"-c \"ping -c 1 {host}\"");
-    return Results.Ok($"tracing {host}");
-});
 // Minimal shipment API backed by an in-memory store (no database).
 app.MapGet("/api/shipments", (ShipmentStore store) => Results.Ok(store.All()));
 

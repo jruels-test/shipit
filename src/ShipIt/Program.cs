@@ -3,11 +3,6 @@ using ShipIt.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-{
-    builder.Services.AddApplicationInsightsTelemetry();
-}
-
 // Default to port 8080 (matches the container image and the Kubernetes probes
 // used in Modules 3 and 6) unless the host sets ASPNETCORE_URLS.
 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
@@ -23,7 +18,7 @@ var app = builder.Build();
 // ConfigMap (Module 6); locally they fall back to sensible defaults.
 static string Region() => Environment.GetEnvironmentVariable("SHIPIT_REGION") ?? "local";
 static string BannerColor() => Environment.GetEnvironmentVariable("SHIPIT_BANNER_COLOR") ?? "green";
-static string AppVersion() => Environment.GetEnvironmentVariable("SHIPIT_VERSION") ?? "0.1.1-dev";
+static string AppVersion() => Environment.GetEnvironmentVariable("SHIPIT_VERSION") ?? "0.1.0-dev";
 // Readiness can be forced off with SHIPIT_READY=false to simulate a bad deploy
 // (used to trigger rollback in Labs 5 and 7).
 static bool IsReady() =>
@@ -90,5 +85,3 @@ app.Run();
 
 // Exposed so the test project can host the app with WebApplicationFactory<Program>.
 public partial class Program { }
-// QA: trigger a fresh CI run to rule out re-run cache poisoning
-// QA: verify auto-merge now works

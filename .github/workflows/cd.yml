@@ -50,10 +50,14 @@ jobs:
           PREV=$(az containerapp show -n shipit-production -g "$RG" \
             --query "properties.template.containers[0].image" -o tsv)
           echo "prev=$PREV" >> "$GITHUB_OUTPUT"
-      - name: Deploy new image
+      - uses: azure/aks-set-context@v5
+        with:
+          resource-group: ${{ vars.RG }}
+          cluster-name: ${{ vars.AKS }}
+      - name: Deploy with Helm
         run: |
-          az containerapp update -n shipit-production -g "$RG" \
-            --image "$ACR.azurecr.io/shipit:$SHA"
+          helm upgrade --install shipit charts/shipit \
+            --set image.tag=${{ github.sha }} --wait
       - name: Health check
         id: health
         continue-on-error: true

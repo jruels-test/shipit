@@ -34,10 +34,6 @@ jobs:
     needs: deploy-staging
     runs-on: ubuntu-latest
     environment: production        # run pauses here for the required reviewer
-    env:
-      SHA: ${{ github.event.workflow_run.head_sha }}
-      RG: ${{ vars.RG }}
-      ACR: ${{ vars.ACR }}
     steps:
       - uses: actions/checkout@v5
       - uses: azure/login@v3
@@ -45,44 +41,21 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      - name: Record current image (for rollback)
-        id: current
-        run: |
-          PREV=$(az containerapp show -n shipit-production -g "$RG" \
-            --query "properties.template.containers[0].image" -o tsv)
-          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
       - uses: azure/aks-set-context@v5
         with:
           resource-group: ${{ vars.RG }}
           cluster-name: ${{ vars.AKS }}
       - name: Deploy with Helm
+        id: deploy
+        continue-on-error: true
         run: |
           helm upgrade --install shipit charts/shipit \
             --set image.tag=${{ github.sha }} --wait
-      - name: Health check
-        id: health
-        continue-on-error: true
-        run: |
-          FQDN=$(az containerapp show -n shipit-production -g "$RG" \
-            --query "properties.configuration.ingress.fqdn" -o tsv)
-          sleep 30
-          ok=0
-          for i in $(seq 1 18); do
-            if curl -fsS "https://$FQDN/readyz" >/dev/null 2>&1; then
-              ok=$((ok+1))
-            else
-              ok=0
-            fi
-            if [ "$ok" -ge 5 ]; then echo "sustained ready"; exit 0; fi
-            sleep 5
-          done
-          echo "never became reliably ready"; exit 1
       - name: Roll back on failure
-        if: steps.health.outcome == 'failure'
+        if: steps.deploy.outcome == 'failure'
         run: |
-          echo "::error::Deploy failed readiness. Rolling back to ${{ steps.current.outputs.prev }}"
-          az containerapp update -n shipit-production -g "$RG" \
-            --image "${{ steps.current.outputs.prev }}"
+          echo "::error::Deploy failed readiness. Rolling back to the previous Helm release."
+          helm rollback shipit
           exit 1
 
   infra:

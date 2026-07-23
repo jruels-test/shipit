@@ -9,8 +9,4 @@
     <AssemblyName>ShipIt</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-  </ItemGroup>
-
 </Project>
